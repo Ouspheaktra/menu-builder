@@ -31,12 +31,12 @@ new MenuBuilder({ container });
 
 A container to hold the builder
 
-#### `lang` option : String[]
+#### `lang` option : `String[]`
 
 An array of languages.  
 Default: `["en", "km", "th", "vn", "kr", "jp", "ch"]`.
 
-#### `data` option : Object[]
+#### `data` option : `Object[]`
 
 An array of menu data.
 
@@ -52,7 +52,7 @@ The one's provided in option.
 
 ### Methods
 
-#### `genJson()` method : String
+#### `genJson()` method : `String`
 
 Get JSON string which represent current menu.
 
