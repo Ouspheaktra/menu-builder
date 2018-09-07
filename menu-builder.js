@@ -220,7 +220,7 @@
 			onEnd: e => {
 				let isSubmenu = $(e.to).hasClass("menu-builder-submenu");
 				$(e.item)[`${isSubmenu ? "add" : "remove"}Class`]("menu-builder-submenu-item")
-					.find(".menu-builder-submenu-cont")[isSubmenu ? "hide" : "show"]();
+					.children(".menu-builder-submenu-cont")[isSubmenu ? "hide" : "show"]();
 			}
 		};
 
