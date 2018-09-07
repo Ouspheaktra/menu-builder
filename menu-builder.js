@@ -21,27 +21,46 @@
 
 	function setText(el, text) {
 		let node = el.contents().get(0);
-		if (text === "")
-			text = "[NO NAME]";
+		if (text === "" || text === undefined)
+			text = "[NO TITLE]";
 		if (node && node.constructor === Text)
 			node.nodeValue = text;
 		else
-			el.append(text);
+			el.prepend(text);
+		return el;
+	}
+
+	function alert(text) {
+		let el = $('<div class="alert alert-danger fade show" role="alert">')
+			.text(text)
+			.css({ position: 'fixed', top: 10, left: 10, right: 10, zIndex: 1000, textAlign: 'center' })
+			.append(
+				$('<button type="button" class="close" data-dismiss="alert" aria-label="Close">').append(
+					$('<span aria-hidden="true">').html('&times;')
+				));
+		$(document.body).append(el);
+		el.alert();
+		setTimeout(() => el.alert("close"), 1500);
 	}
 
 	let number = 0;
 
 	function MenuBuilder({
 		container,
-		lang = ["en", "km", "th", "vn", "kr", "jp", "ch"],
-		data = [{ name: { en: "Menu" }, link: "" }],
-		depth = 1
+		defaultLang = "km",
+		lang = ["km", "en", "th", "vn", "kr", "jp", "ch"],
+		data = [{ name: { en: "Home", km: "ទំព័រ​ដើម" }, link: "" }],
+		depth = 1,
 	}) {
 		if (this === window)
 			return new MenuBuilder(...arguments);
+		if (lang.indexOf(defaultLang) < 0)
+			throw Error(`defaultLang:'${defaultLang}' does not exist in lang:[${lang}]`)
+		this.defaultLang = defaultLang;
 		this.depth = depth;
-		let indData = {};
+		this.lang = lang;
 		let itemId = 0;
+		let activeData = {};
 		let activeEl = null;
 		let sortableOption = {
 			group: "menu-builder",
@@ -53,7 +72,7 @@
 		function selectLang() {
 			langSelect
 				.find("option")
-				.each((_, l) => $(l)[l.value in indData.name ? "hide" : "show"]())
+				.each((_, l) => $(l)[l.value in activeData.name ? "hide" : "show"]())
 				.each((_, l) => {
 					if (!l.style.display) {
 						langSelect.find("select").val(l.value);
@@ -64,7 +83,7 @@
 		}
 
 		function createLangInput(lang, text) {
-			indData.name[lang] = text;
+			activeData.name[lang] = text;
 			selectLang();
 			return $(`<div class='input-group mb-2' id='menu-builder-${number}-${lang}-cont'>`).append(
 				$("<div class='input-group-prepend'>").append(
@@ -72,19 +91,20 @@
 				$(`<input type='text' class='form-control' id='menu-builder-${number}-${lang}'>`).val(text)
 					.on('input', e => {
 						const val = $(e.target).val();
-						if (lang === "en")
+						if (lang === defaultLang)
 							setText(activeEl, val);
-						indData.name[lang] = val;
+						activeData.name[lang] = val;
 					}),
 				$("<div class='input-group-append'>").append(
 					$("<button class='btn btn-danger' type='button'>").append(
 						$('<span aria-hidden="true">&times;</span>')
 					).click(function (e) {
-						if (lang !== 'en') {
-							delete indData.name[lang];
+						if (lang !== defaultLang) {
+							delete activeData.name[lang];
 							$(`#menu-builder-${number}-${lang}-cont`).remove();
 							selectLang();
-						}
+						} else
+							alert("Cannot delete default language");
 					})
 				),
 			)
@@ -95,16 +115,15 @@
 			editCont.empty();
 			if (!el) return;
 			activeEl = el.addClass("active")
-			indData = el.data();
+			activeData = el.data();
 			editCont.append(
-				langCont.empty().append(Object.entries(indData.name).map((one) => createLangInput(...one))),
+				langCont.empty().append(Object.entries(activeData.name).map((one) => createLangInput(...one))),
 				selectLang(),
 				linkInput
 			);
 		}
 
-		function newMenuItem(depth = 0, data = {}) {
-			data = (Object.keys(data).length ? data : { name: { en: `Item-${itemId++}` }, link: "" });
+		function newMenuItem(depth = 0, data = { name: { en: `Item-${itemId}`, km: `ទី-${itemId++}` }, link: "" }) {
 			let ul = $("<ul class='menu-builder-menu list-group mb-2 border rounded'>")
 				.data("depth", depth)
 				.append(data.sub && data.sub.map(sub => newMenuItem(depth + 1, sub)));
@@ -117,7 +136,7 @@
 				)
 			if (depth === 0)
 				return cont;
-			return $(`<li class='list-group-item list-group-item-action'>`).text(data.name.en).data(data).append(cont);
+			return setText($(`<li class='list-group-item list-group-item-action'>`), data.name[defaultLang]).data(data).append(cont);
 		}
 		newMenuItem = newMenuItem.bind(this);
 
@@ -134,7 +153,7 @@
 		}
 		_genJson = _genJson.bind(this);
 
-		let menuCont = $("<div>").append(newMenuItem(0, {}));
+		let menuCont = $("<div>").append(newMenuItem(0));
 		let editCont = $('<div>');
 		let langCont = $("<div class='ml-3'>")
 		let langSelectBtn = $("<button class='btn btn-primary' type='button'>").text("Add");
@@ -151,8 +170,8 @@
 				$("<div class='input-group-prepend'>").append(
 					$(`<label class='input-group-text' for='menu-builder-${number}-link'>`).text("Link")),
 				$(`<input type='text' class='form-control' id='menu-builder-${number}-link'>`)
-					.val(indData.link)
-					.on("input", e => indData.link = $(e.target).val())
+					.val(activeData.link)
+					.on("input", e => activeData.link = $(e.target).val())
 			);
 
 		let genJsonModal =
@@ -200,7 +219,7 @@
 				let json = JSON.parse(jsonString);
 				itemId = 0;
 				menuCont.empty()
-					.append(newMenuItem(0, {}))
+					.append(newMenuItem(0))
 					.find("ul").append(json.map(one => newMenuItem(1, one)))
 			} catch (error) {
 				if (error.constructor === SyntaxError)

@@ -40,17 +40,15 @@ Default: `["en", "km", "th", "vn", "kr", "jp", "ch"]`.
 
 An array of menu data.
 
-#### `depth` option : 'Number'
+#### `depth` option : `Number`
 
 Maximum depth of menu.
 Default: `1` means: can have one-depth submenu.
 
+#### `defaultLang` option : `String`
 
-### Properties
-
-#### `container` property : `HTMLelement`
-
-The one's provided in option.
+Set default language.
+default: `en`.
 
 
 
@@ -64,3 +62,8 @@ Get JSON string which represent current menu.
 
 Import JSON String, and redraw current MenuBuilder.
 
+
+
+### Properties
+
+There are few properties, but they're not what you should worry about. They're almost the same as the Options above.
