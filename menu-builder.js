@@ -13,19 +13,10 @@
 	.container-fluid { padding-top: 15px; }
 	.sortable-ghost { opacity: .5; }
 	.sortable-chosen { background-color: lightblue; }
-	.menu-builder-gen-json {
-		position: fixed;
-		bottom: .5em;
-		left: .5em;
-	}
-	.menu-builder-imp-json {
-		position: fixed;
-		bottom: .5em;
-		right: .5em;
-	}
+	.menu-builder-gen-json { position: fixed; bottom: .5em; left: .5em; }
+	.menu-builder-imp-json { position: fixed; bottom: .5em; right: .5em; }
 	.code { font: 1.2em monospace; }
-	.menu-builder-submenu { min-height: 25px; background: white; }
-	.menu-builder-submenu-item { padding: 6px 10px;}
+	.menu-builder-menu { min-height: 25px; background: white; }
 	`))
 
 	function setText(el, text) {
@@ -43,40 +34,21 @@
 	function MenuBuilder({
 		container,
 		lang = ["en", "km", "th", "vn", "kr", "jp", "ch"],
-		data = [{ name: { en: "Menu" }, link: "" }]
+		data = [{ name: { en: "Menu" }, link: "" }],
+		depth = 1
 	}) {
 		if (this === window)
 			return new MenuBuilder(...arguments);
-
-		container = container instanceof $ ? container : $(container);
-		this.container = container;
+		this.depth = depth;
 		let indData = {};
 		let itemId = 0;
 		let activeEl = null;
-
-		this.genJson = function () {
-			let json = [];
-			menuCont.children("li").each((_, li) => {
-				let one = $(li).data();
-				one.sub = [];
-				$(li).find(".menu-builder-submenu").first().children("li").each((_, subli) => one.sub.push($(subli).data()));
-				if (!one.sub.length)
-					delete one.sub
-				json.push(one);
-			});
-			return JSON.stringify(json);
-		}
-		this.impJson = function (jsonString) {
-			try {
-				let json = JSON.parse(jsonString);
-				itemId = 0;
-				menuCont.children("li").remove();
-				menuCont.children("button").before(json.map(one => newMenuItem(false, one)));
-			} catch (error) {
-				if (error.constructor === SyntaxError)
-					console.log("Invalid JSON");
-			}
-		}
+		let sortableOption = {
+			group: "menu-builder",
+			onChoose: e => setActiveItem($(e.item)),
+			onStart: e => $(e.item).find(".menu-builder-menu-cont").first().hide(),
+			onEnd: e => $(e.item).children(".menu-builder-menu-cont")[$(e.to).data("depth") >= this.depth ? "hide" : "show"]()
+		};
 
 		function selectLang() {
 			langSelect
@@ -131,31 +103,38 @@
 			);
 		}
 
-		function newMenuItem(submenu = false, d = {}) {
-			d = (Object.keys(d).length ? { ...d } : { name: { en: `Item-${itemId++}` }, link: "" });
-			let ul =
-				$("<ul class='menu-builder-submenu list-group mb-2 border rounded'>").append(
-					d.sub && d.sub.map(sub => newMenuItem(true, sub)));
+		function newMenuItem(depth = 0, data = {}) {
+			data = (Object.keys(data).length ? data : { name: { en: `Item-${itemId++}` }, link: "" });
+			let ul = $("<ul class='menu-builder-menu list-group mb-2 border rounded'>")
+				.data("depth", depth)
+				.append(data.sub && data.sub.map(sub => newMenuItem(depth + 1, sub)));
 			new Sortable(ul.get(0), sortableOption);
-			return $(`<li class='list-group-item list-group-item-action ${submenu ? 'menu-builder-submenu-item' : ''}'>`).text(d.name.en).data(d).append(
-				$("<div class='menu-builder-submenu-cont mt-2 ml-3'>")[submenu ? "hide" : "show"]().append(
+			let cont =
+				$("<div class='menu-builder-menu-cont mt-2 ml-3'>")[depth > this.depth ? "hide" : "show"]().append(
 					ul,
-					$("<button class='btn btn-default btn-sm float-right'>").text("Add Submenu")
-						.click(function () {
-							$(this)
-								.prev()
-								.append(newMenuItem(true))
-						})
+					$("<button class='btn btn-default btn-sm float-right'>").text("Add Menu")
+						.click(e => $(e.target).prev().append(newMenuItem(depth + 1)))
 				)
-			);
+			if (depth === 0)
+				return cont;
+			return $(`<li class='list-group-item list-group-item-action'>`).text(data.name.en).data(data).append(cont);
 		}
+		newMenuItem = newMenuItem.bind(this);
 
-		let menuCont =
-			$('<ul class="list-group mb-2">').append(
-				$('<button class="btn btn-primary" type="button">')
-					.text("Add Menu")
-					.click(e => $(e.target).before(newMenuItem()))
-			)
+		function _genJson(menu) {
+			let json = [];
+			let getSub = menu.data("depth") < this.depth;
+			menu.children("li").each((_, li) => {
+				let one = $(li).data();
+				if (getSub && (one.sub = _genJson($(li).find(".menu-builder-menu").first())) && !one.sub.length)
+					delete one.sub
+				json.push(one);
+			});
+			return json;
+		}
+		_genJson = _genJson.bind(this);
+
+		let menuCont = $("<div>").append(newMenuItem(0, {}));
 		let editCont = $('<div>');
 		let langCont = $("<div class='ml-3'>")
 		let langSelectBtn = $("<button class='btn btn-primary' type='button'>").text("Add");
@@ -215,23 +194,28 @@
 			)
 		let impJsonBtn = $(`<button class="menu-builder-imp-json btn btn-default" type="button" data-toggle="modal" data-target="#${impJsonModal.get(0).id}">`).text("Import JSON");
 
-		var sortableOption = {
-			group: "menu-builder",
-			onChoose: e => setActiveItem($(e.item)),
-			onStart: e => $(e.item).find(".menu-builder-submenu-cont").hide(),
-			onEnd: e => {
-				let isSubmenu = $(e.to).hasClass("menu-builder-submenu");
-				$(e.item)[`${isSubmenu ? "add" : "remove"}Class`]("menu-builder-submenu-item")
-					.children(".menu-builder-submenu-cont")[isSubmenu ? "hide" : "show"]();
+		this.genJson = () => JSON.stringify(_genJson(menuCont.find("ul").first()));
+		this.impJson = function (jsonString) {
+			try {
+				let json = JSON.parse(jsonString);
+				itemId = 0;
+				menuCont.empty()
+					.append(newMenuItem(0, {}))
+					.find("ul").append(json.map(one => newMenuItem(1, one)))
+			} catch (error) {
+				if (error.constructor === SyntaxError)
+					console.log("Invalid JSON");
+				else
+					console.error(error)
 			}
-		};
-
-		var s = new Sortable(menuCont.get(0), sortableOption);
-
-		container.addClass("container-fluid").append(
-			$("<div class='row'>").append(
-				$("<div class='col-6'>").append(menuCont, genJsonBtn, genJsonModal, impJsonBtn, impJsonModal),
-				$("<div class='col-6'>").append(editCont)
+		}
+		var s = new Sortable(menuCont.find("ul").get(0), sortableOption);
+		this.container = (container instanceof $ ? container : $(container)).append(
+			$("<div class='container-fluid'>").append(
+				$("<div class='row'>").append(
+					$("<div class='col-6'>").append(menuCont, genJsonBtn, genJsonModal, impJsonBtn, impJsonModal),
+					$("<div class='col-6'>").append(editCont)
+				)
 			)
 		)
 

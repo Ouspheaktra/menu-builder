@@ -40,6 +40,10 @@ Default: `["en", "km", "th", "vn", "kr", "jp", "ch"]`.
 
 An array of menu data.
 
+#### `depth` option : 'Number'
+
+Maximum depth of menu.
+Default: `1` means: can have one-depth submenu.
 
 
 ### Properties
