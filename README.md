@@ -7,7 +7,6 @@
 ## Requirements
 
 * [JQuery](https://github.com/jquery/jquery) (v3.3.1 tested)
-* [Bootstrap](https://github.com/twbs/bootstrap) css & js (v4.1.3 tested)
 * [Sortable](https://github.com/RubaXa/Sortable) (v1.4.0 tested)
 
 
@@ -66,4 +65,6 @@ Import JSON String, and redraw current MenuBuilder.
 
 ### Properties
 
-There are some properties, but they're not what you should worry about. They're almost the same as the Options above.
+There are some properties, but they're not what you should worry about.  
+Some of them are the options.  
+Others are the elements...
