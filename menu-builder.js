@@ -57,7 +57,7 @@
 			menuCont.children("li").each((_, li) => {
 				let one = $(li).data();
 				one.sub = [];
-				$(li).find("li").each((_, subli) => one.sub.push($(subli).data()));
+				$(li).find(".menu-builder-submenu").first().children("li").each((_, subli) => one.sub.push($(subli).data()));
 				if (!one.sub.length)
 					delete one.sub
 				json.push(one);
