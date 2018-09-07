@@ -66,4 +66,4 @@ Import JSON String, and redraw current MenuBuilder.
 
 ### Properties
 
-There are few properties, but they're not what you should worry about. They're almost the same as the Options above.
+There are some properties, but they're not what you should worry about. They're almost the same as the Options above.

@@ -1,8 +1,6 @@
 ; (function () {
 	if (window.jQuery === undefined)
 		throw Error("Require JQuery.js: you can have it here: https://code.jquery.com/jquery-3.3.1.min.js")
-	if (window.bootstrap === undefined)
-		throw Error("Require Bootstrap.js: you can have it here: https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js")
 	if (window.Sortable === undefined)
 		throw Error("Require Sortable.js: you can have it here: https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js")
 
@@ -10,13 +8,36 @@
 		return;
 	$(document.head).append(
 		$("<style>").text(`
-	.container-fluid { padding-top: 15px; }
+	.menu-builder-container-fluid { padding-top: 15px; }
 	.sortable-ghost { opacity: .5; }
 	.sortable-chosen { background-color: lightblue; }
 	.menu-builder-gen-json { position: fixed; bottom: .5em; left: .5em; }
 	.menu-builder-imp-json { position: fixed; bottom: .5em; right: .5em; }
-	.code { font: 1.2em monospace; }
-	.menu-builder-menu { min-height: 25px; background: white; }
+	.menu-builder-code { font: 1.2em monospace; }
+	.menu-builder-menu-cont {
+		margin-top: .5em;
+		margin-left: .75em;
+	}
+	.menu-builder-menu {
+		min-height: 25px;
+		background: white;
+		margin-bottom: .5em;
+		border: 1px solid lightgray;
+		display: flex;
+		flex-direction: column;
+		padding-left: 0;
+	}
+	.menu-builder-menu-item {
+		list-style: none;
+		padding: .5em;
+		border-bottom: 1px solid lightgray; 
+	}
+	.menu-builder-menu-item:last-of-type { border: none; }
+	.menu-builder-btn {
+		padding: .5em;
+		border: 1px solid lightgray;
+	}
+	[class^=menu-builder-] { border-radius: 5px; }
 	`))
 
 	function setText(el, text) {
@@ -124,19 +145,19 @@
 		}
 
 		function newMenuItem(depth = 0, data = { name: { en: `Item-${itemId}`, km: `ទី-${itemId++}` }, link: "" }) {
-			let ul = $("<ul class='menu-builder-menu list-group mb-2 border rounded'>")
+			let ul = $("<ul class='menu-builder-menu'>")
 				.data("depth", depth)
 				.append(data.sub && data.sub.map(sub => newMenuItem(depth + 1, sub)));
 			new Sortable(ul.get(0), sortableOption);
 			let cont =
-				$("<div class='menu-builder-menu-cont mt-2 ml-3'>")[depth > this.depth ? "hide" : "show"]().append(
+				$("<div class='menu-builder-menu-cont'>")[depth > this.depth ? "hide" : "show"]().append(
 					ul,
-					$("<button class='btn btn-default btn-sm float-right'>").text("Add Menu")
+					$("<button class='menu-builder-btn'>").css("float", "right").text("Add Menu")
 						.click(e => $(e.target).prev().append(newMenuItem(depth + 1)))
 				)
 			if (depth === 0)
 				return cont;
-			return setText($(`<li class='list-group-item list-group-item-action'>`), data.name[defaultLang]).data(data).append(cont);
+			return setText($(`<li class='menu-builder-menu-item'>`), data.name[defaultLang]).data(data).append(cont);
 		}
 		newMenuItem = newMenuItem.bind(this);
 
@@ -181,17 +202,17 @@
 						$('<div class="modal-header">').append(
 							$('<h4 class="modal-title">').text("JSON")),
 						$('<div class="modal-body">').append(
-							$('<div class="code"></div>'))
+							$('<div class="menu-builder-code"></div>'))
 					)
 				)
 			)
 		let genJsonBtn =
 			$(`<button class="menu-builder-gen-json btn btn-default" type="button" data-toggle="modal" data-target="#${genJsonModal.get(0).id}">`)
 				.text("Generate JSON")
-				.click(() => genJsonModal.find('.code').text(this.genJson()))
+				.click(() => genJsonModal.find('.menu-builder-code').text(this.genJson()))
 		let impJsonForm =
 			$('<form>').append(
-				$('<textarea name="json" cols="30" rows="10" class="form-control code mb-2">'),
+				$('<textarea name="json" cols="30" rows="10" class="form-control menu-builder-code mb-2">'),
 				$('<input type="submit" class="btn btn-primary">')
 			).submit(e => {
 				e.preventDefault();
@@ -230,10 +251,10 @@
 		}
 		var s = new Sortable(menuCont.find("ul").get(0), sortableOption);
 		this.container = (container instanceof $ ? container : $(container)).append(
-			$("<div class='container-fluid'>").append(
+			$("<div>").css("clear", "both").append(
 				$("<div class='row'>").append(
-					$("<div class='col-6'>").append(menuCont, genJsonBtn, genJsonModal, impJsonBtn, impJsonModal),
-					$("<div class='col-6'>").append(editCont)
+					$("<div>").css({width: '50%', float: 'left'}).append(menuCont, genJsonBtn, genJsonModal, impJsonBtn, impJsonModal),
+					$("<div>").css({width: '50%', float: 'left'}).append(editCont)
 				)
 			)
 		)
