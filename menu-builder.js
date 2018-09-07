@@ -45,8 +45,10 @@
 		lang = ["en", "km", "th", "vn", "kr", "jp", "ch"],
 		data = [{ name: { en: "Menu" }, link: "" }]
 	}) {
+		if (this === window)
+			return new MenuBuilder(...arguments);
+
 		container = container instanceof $ ? container : $(container);
-		let self = this;
 		this.container = container;
 		let indData = {};
 		let itemId = 0;
