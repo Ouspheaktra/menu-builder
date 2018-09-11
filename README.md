@@ -53,11 +53,11 @@ default: `en`.
 
 ### Methods
 
-#### `genJson()` method : `String`
+#### `generateJson()` method : `String`
 
 Get JSON string which represent current menu.
 
-#### `impJson(json : String)` method
+#### `importJson(json : String)` method
 
 Import JSON String, and redraw current MenuBuilder.
 

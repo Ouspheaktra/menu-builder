@@ -1,0 +1,142 @@
+.menu-builder-input-group>*,
+.menu-builder-form>textarea,
+.menu-builder-block-inner,
+.menu-builder-menu-item,
+.menu-builder-btn {
+    padding: .5em;
+}
+
+.menu-builder-input-group,
+.menu-builder-menu,
+.menu-builder-btn {
+    border: 1px solid lightgray;
+}
+
+.menu-builder-form>textarea,
+.menu-builder-input-group,
+.menu-builder-block-inner,
+.menu-builder-menu,
+.menu-builder-btn {
+    border-radius: 5px;
+}
+
+.menu-builder {
+    display: flex;
+}
+
+.menu-builder * {
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+.menu-builder h4 {
+    font-size: 1.3em;
+    margin: 1em 0;
+}
+
+.menu-builder>div {
+    width: 50%;
+    padding: 10px;
+}
+
+.menu-builder-active {
+    background: lightblue;
+}
+
+.menu-builder-transparent {
+    opacity: .5;
+}
+
+.menu-builder-gen-json {
+    position: fixed;
+    bottom: .5em;
+    left: .5em;
+}
+
+.menu-builder-imp-json {
+    position: fixed;
+    bottom: .5em;
+    right: .5em;
+}
+
+.menu-builder-code {
+    font: 1.2em monospace;
+}
+
+.menu-builder-menu-cont {
+    margin-left: 1em;
+    margin-top: .25em;
+}
+
+.menu-builder-menu-cont>button {
+    float: right;
+}
+
+.menu-builder-menu {
+    background: white;
+    min-height: 25px;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0 0 .5em 0;
+}
+
+.menu-builder-menu-item {
+    list-style: none;
+    border-bottom: 1px solid lightgray;
+}
+
+.menu-builder-menu-item:last-of-type {
+    border: none;
+}
+
+.menu-builder-input-group {
+    display: flex;
+    margin-bottom: .5em;
+}
+
+.menu-builder-input-group>* {
+    border: none;
+}
+
+.menu-builder-input-group> :nth-child(1) {
+    background: lightgray;
+}
+
+.menu-builder-input-group> :nth-child(2) {
+    flex-grow: 2;
+}
+
+.menu-builder-input-group> :nth-child(3) {
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.menu-builder-block {
+    background: rgba(0, 0, 0, .5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto !important;
+    z-index: 1000;
+}
+
+.menu-builder-block-inner {
+    width: 50%;
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+}
+
+.menu-builder-block-inner>div {
+    padding: .5em 0;
+}
+
+.menu-builder-form {
+    display: flex;
+    flex-direction: column;
+}
